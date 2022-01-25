@@ -1,10 +1,10 @@
+from flask import render_template, redirect, request, session, flash
 from flask_app import app
 from flask_app.models.recipe import Recipe
 from flask_app.models.user import User
 from flask_bcrypt import Bcrypt
 bcrypt = Bcrypt(app)
 
-from flask import render_template, redirect, request, session, flash
 
 @app.route('/recipes/new')
 def new_recipe():
@@ -14,6 +14,7 @@ def new_recipe():
     all_recipes=logged_in_user.recipes
     print(all_recipes)
     return render_template('create.html', all_recipes=all_recipes)
+
 
 @app.route('/recipes/create', methods=['POST'])
 def create_recipe():
@@ -34,6 +35,7 @@ def create_recipe():
     recipe_id=Recipe.create(data)
     return redirect('/dashboard')
 
+
 @app.route('/recipes/<int:id>')
 def get_recipe(id):
     if 'id' not in session:
@@ -42,19 +44,6 @@ def get_recipe(id):
     selected_recipe=Recipe.get_one({'id':id})
     return render_template('recipe.html', user=logged_in_user, recipe=selected_recipe)
 
-@app.route('/recipes/delete/<int:id>')
-def delete_recipe(id):
-    if 'id' not in session:
-        return redirect('/')
-    Recipe.delete({'id':id})
-    return redirect('/dashboard')
-
-@app.route('/recipes/edit/<int:id>')
-def edit_recipe(id):
-    if 'id' not in session:
-        return redirect('/')
-    selected_recipe=Recipe.get_one({'id':id})
-    return render_template('update.html', recipe=selected_recipe)
 
 @app.route('/recipes/update/<int:id>', methods=['POST'])
 def update_recipe(id):
@@ -73,3 +62,18 @@ def update_recipe(id):
     Recipe.update(data)
     return redirect('/dashboard')
 
+
+@app.route('/recipes/edit/<int:id>')
+def edit_recipe(id):
+    if 'id' not in session:
+        return redirect('/')
+    selected_recipe=Recipe.get_one({'id':id})
+    return render_template('update.html', recipe=selected_recipe)
+
+
+@app.route('/recipes/delete/<int:id>')
+def delete_recipe(id):
+    if 'id' not in session:
+        return redirect('/')
+    Recipe.delete({'id':id})
+    return redirect('/dashboard')

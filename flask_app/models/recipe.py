@@ -2,6 +2,7 @@ from flask_app.config.mysqlconnection import connectToMySQL
 from flask import flash
 from datetime import datetime
 
+
 class Recipe:
     def __init__(self, data):
         self.id=data['id']
@@ -15,23 +16,6 @@ class Recipe:
         if 'user_id' in data:
             self.user=data['user_id']
 
-    @classmethod
-    def get_all(cls):
-        query = "SELECT * FROM recipes;"
-        results =  connectToMySQL("recipes_schema").query_db(query)
-        all_recipes = []
-        for row in results:
-            print(row['date_made'])
-            all_recipes.append( cls(row) )
-        return all_recipes
-
-    @classmethod
-    def get_one(cls, data):
-
-        query="SELECT * FROM recipes WHERE id=%(id)s;"
-        result=connectToMySQL('recipes_schema').query_db(query, data)
-        print(result)
-        return cls(result[0])
 
     @classmethod
     def create(cls, data):
@@ -40,12 +24,25 @@ class Recipe:
         result=connectToMySQL('recipes_schema').query_db(query, data)
         return result
 
+
     @classmethod
-    def delete(cls, data):
-        query="DELETE FROM recipes "\
-            "WHERE id=%(id)s;"
+    def get_one(cls, data):
+        query="SELECT * FROM recipes WHERE id=%(id)s;"
         result=connectToMySQL('recipes_schema').query_db(query, data)
-        return result
+        print(result)
+        return cls(result[0])
+
+
+    @classmethod
+    def get_all(cls):       #method does not need 'data'
+        query = "SELECT * FROM recipes;"
+        results =  connectToMySQL("recipes_schema").query_db(query)
+        all_recipes = []
+        for row in results:
+            print(row['date_made'])
+            all_recipes.append( cls(row) )
+        return all_recipes
+
 
     @classmethod
     def update(cls, data):
@@ -56,6 +53,15 @@ class Recipe:
             "WHERE id=%(id)s;"
         result=connectToMySQL('recipes_schema').query_db(query, data)
         return result
+
+
+    @classmethod
+    def delete(cls, data):
+        query="DELETE FROM recipes "\
+            "WHERE id=%(id)s;"
+        result=connectToMySQL('recipes_schema').query_db(query, data)
+        return result
+
 
     @staticmethod
     def validate(data):

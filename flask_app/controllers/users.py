@@ -5,26 +5,13 @@ from flask_bcrypt import Bcrypt
 bcrypt = Bcrypt(app)
 from flask import render_template, redirect, request, session, flash
 
+
 @app.route('/')
 def index():
     if 'id' in session:
         return redirect('/dashboard')
-
     return render_template('index.html')
 
-@app.route('/login', methods=['POST'])
-def login():
-    user_in_db=User.get_by_email({'email':request.form['email']})
-    if not user_in_db:
-        flash("*invalid email address", "login_errors")
-        return redirect('/')
-
-    if not bcrypt.check_password_hash(user_in_db.password, request.form['password']):
-        flash("*password incorrect", "login_errors")
-        return redirect('/')
-
-    session['id']=user_in_db.id
-    return redirect('/dashboard')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -42,14 +29,28 @@ def register():
     session['id']=user_id
     return redirect('/dashboard')
 
+
+@app.route('/login', methods=['POST'])
+def login():
+    user_in_db=User.get_by_email({'email':request.form['email']})
+    if not user_in_db:
+        flash("*Invalid login credentials", "login_errors")
+        return redirect('/')
+    if not bcrypt.check_password_hash(user_in_db.password, request.form['password']):
+        flash("*Invalid login credentials", "login_errors")
+        return redirect('/')
+    session['id']=user_in_db.id
+    return redirect('/dashboard')
+
+
 @app.route('/dashboard')
 def dashboard():
     if 'id' not in session:
         return redirect('/')
-
     logged_in_user=User.get_one({'id':session['id']})
     all_recipes=Recipe.get_all()
     return render_template('dashboard.html', user=logged_in_user, all_recipes=all_recipes)
+
 
 @app.route('/logout')
 def logout():
